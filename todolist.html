@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODOS</title>
+    <link rel="stylesheet" href="/bootstrap-5.0.2-dist/css/bootstrap.css">
+</head>
+<body>
+  <div class="container border border-success shadow-sm mt-4 rounded">
+    <div class="row my-4">
+      <div class="col-12 text-center">
+        <h1>TODO List</h1>
+      </div>
+    </div>
+
+    <!-- TODO Form -->
+    <div class="row my-4">
+      <div class="col-md-8 offset-md-2">
+        <div class="input-group">
+          <input type="text" class="form-control" id="todoInput" placeholder="Enter a new task">
+          <button class="btn btn-primary" id="addTodoButton">Add TODO</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TODO List -->
+    <div class="row my-4">
+      <div class="col-md-8 offset-md-2">
+        <ul class="list-group" id="todoList">
+          <!-- TODO items will be dynamically added here -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load saved TODOs from local storage on page load
+      loadTodos();
+    });
+  
+    document.getElementById('addTodoButton').addEventListener('click', function() {
+      const todoIn = document.getElementById('todoInput');
+      const todoText = todoIn.value;
+  
+      if (todoText) {  // Ensure there is text to add
+        addTodoItem(todoText); // Reflects immediately on UI
+        saveTodoToLocalStorage(todoText);  // Save to local storage
+        todoIn.value = '';
+      }
+    });
+  
+    function addTodoItem(text) {
+      const todoList = document.getElementById('todoList');
+      const listItem = document.createElement('li');
+      listItem.className = 'list-group-item todo-item';
+      listItem.innerHTML = `<span>${text}</span>`;
+      todoList.appendChild(listItem);
+    }
+  
+    // Updated to use "vandnatodos" as the storage key
+    function saveTodoToLocalStorage(todo) {
+      let todos = JSON.parse(localStorage.getItem('vandnatodos')) || [];
+      let updatedTodos = [...todos, todo]; // Destructure todos and add the new todo
+      localStorage.setItem('vandnatodos', JSON.stringify(updatedTodos));
+    }
+  
+    function loadTodos() {
+      let todos = JSON.parse(localStorage.getItem('vandnatodos')) || [];
+      [...todos].map(todo => addTodoItem(todo)); // Destructure the array using spread syntax
+    }
+  </script>
+  
+  <script src="/bootstrap-5.0.2-dist/js/bootstrap.js"></script>
+</body>
+</html>
