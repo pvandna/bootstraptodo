@@ -21,17 +21,18 @@
 
         <!-- Todo List -->
         <ul class="list-group" id="todolists">
-            <!-- Todo items will appear here -->
+            <!-- Todo items will appear here dynamically -->
         </ul>
     </div>
 
-    <!-- Bootstrap JS -->
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
         const todolists = document.getElementById("todolists");
         const todovalue = document.getElementById("todovalue");
         let todolistvalue = [];
+        let currentEditIndex = -1; // Keeps track of which todo is being edited
 
         const getdatafromlocalstorage = () => {
             return JSON.parse(localStorage.getItem("tododata")) || [];
@@ -68,15 +69,20 @@
 
                 todolists.appendChild(li);
 
+                // Update button logic
                 updateButton.addEventListener("click", () => {
-                    const newTodoText = prompt("Update your todo", currtodo);
-                    if (newTodoText && newTodoText !== currtodo) {
-                        todolistvalue[index] = newTodoText;
-                        addtodolistlocalstorage(todolistvalue);
-                        li.firstChild.textContent = newTodoText; // Update the todo text
-                    }
+                    // Set the current todo value into the input field for editing
+                    todovalue.value = currtodo;
+
+                    // Set the current index for editing
+                    currentEditIndex = index;
+
+                    // Change the "Add Todo" button text to "Update Todo"
+                    const addButton = document.querySelector("button[type='submit']");
+                    addButton.textContent = "Update Todo";
                 });
 
+                // Delete button logic
                 deleteButton.addEventListener("click", () => {
                     todolistvalue = todolistvalue.filter(todo => todo !== currtodo);
                     addtodolistlocalstorage(todolistvalue);
@@ -90,52 +96,29 @@
             todolistvalue = getdatafromlocalstorage();
             let newtodo = todovalue.value.trim();
 
-            if (newtodo.length !== 0 && !todolistvalue.includes(newtodo)) {
-                todolistvalue.push(newtodo);
+            if (newtodo.length !== 0) {
+                if (currentEditIndex !== -1) {
+                    // Update the existing todo if we are editing
+                    todolistvalue[currentEditIndex] = newtodo;
+                    currentEditIndex = -1; // Reset the editing index
+                } else {
+                    // Add new todo to the list
+                    todolistvalue.push(newtodo);
+                }
+
                 addtodolistlocalstorage(todolistvalue);
+                showtodo(); // Re-render the todo list
+                todovalue.value = ""; // Clear input field
 
-                const li = document.createElement("li");
-                li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-
-                li.textContent = newtodo;
-
-                const buttonGroup = document.createElement("span");
-                buttonGroup.classList.add("btn-group", "btn-group-sm");
-
-                const updateButton = document.createElement("button");
-                updateButton.textContent = "Update!";
-                updateButton.classList.add("btn", "btn-outline-primary");
-
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Delete";
-                deleteButton.classList.add("btn", "btn-outline-danger");
-
-                buttonGroup.appendChild(updateButton);
-                buttonGroup.appendChild(deleteButton);
-                li.appendChild(buttonGroup);
-
-                todolists.appendChild(li);
-
-                updateButton.addEventListener("click", () => {
-                    const newTodoText = prompt("Update your todo", newtodo);
-                    if (newTodoText && newTodoText !== newtodo) {
-                        todolistvalue[todolistvalue.indexOf(newtodo)] = newTodoText;
-                        addtodolistlocalstorage(todolistvalue);
-                        li.firstChild.textContent = newTodoText;
-                    }
-                });
-
-                deleteButton.addEventListener("click", () => {
-                    todolistvalue = todolistvalue.filter(todo => todo !== newtodo);
-                    addtodolistlocalstorage(todolistvalue);
-                    todolists.removeChild(li);
-                });
+                // Reset the button text
+                const addButton = document.querySelector("button[type='submit']");
+                addButton.textContent = "Add Todo";
             }
-            todovalue.value = "";
         };
 
         showtodo();
 
+        // Add or update todo when the form is submitted
         document.querySelector("#todoForm").addEventListener("submit", addtodolist);
     </script>
 </body>
